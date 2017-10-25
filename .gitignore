@@ -1,0 +1,7 @@
+bin/
+libs/
+report/*.aux
+report/*.log
+report/*.synctex.gz
+report/*.toc
+report/*.pdf
