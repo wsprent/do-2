@@ -90,10 +90,12 @@ public class Main {
                         rounded_x[i] = 1;
 
                         covered.addAll(coveredBy.get(i+1));
-                    }
 
+                    }
                     else rounded_x[i] = 0;
+
                 }
+
             }
         }
 
@@ -133,6 +135,9 @@ public class Main {
                 rounding(oplF, mod);
             } else if (args[2].contains("-rand")) {
                 rounding(oplF, mod, true);
+            } else if (args[2].contains("-cplex")) {
+                System.out.println("Solved ILP by CPLEX");
+                System.out.printf("Cost Is: %.2f\n", cplex.getObjValue());
             }
         } catch (IloException e) {
             System.out.println("Something bad happened when loading model.");
@@ -142,7 +147,6 @@ public class Main {
 
         long end = System.nanoTime();
         System.out.printf("Took %.2fms\n",(end-start)/1000000.0);
-
 
 
     }
