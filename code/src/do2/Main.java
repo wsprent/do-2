@@ -6,6 +6,8 @@ import ilog.concert.*;
 
 import java.util.Iterator;
 import java.util.Random;
+import java.util.HashMap;
+import java.util.HashSet;
 
 public class Main {
 
@@ -17,7 +19,7 @@ public class Main {
 
         // Number of Sets
         int n = mod.getElement("n").asInt();
-        // Number of Covers
+        // Size of the Universe
         int m = mod.getElement("m").asInt();
 
 
@@ -26,23 +28,38 @@ public class Main {
 
         IloTupleSet covers = mod.getElement("covers").asTupleSet();
         Iterator it = covers.iterator();
-        int f = 0;  
-        int cur = 0;
+        int f = 0;
+        int currentElement = 0;
+        int currentSet;
         int fTemp = 0;
         IloTuple cover;
-        
+        HashMap<Integer, HashSet> coveredBy = new HashMap<Integer, HashSet>(m);
+
         // find frequency of most frequent element;
+        // and set indices for when covers start in the list
+        // we assume the cover tuples are sorted by set
         for (int i = 0; i < covers.getSize(); i++) {
+            // (elem, set)
             cover = covers.makeTuple(i);
-            //covers.setAt(indices, cover);
-            if (cur != cover.getIntValue(0)) {
+
+            if (currentElement != cover.getIntValue(0)) {
                 if (f < fTemp) {
                     f = fTemp;
                 }
+
                 fTemp = 0;
-                cur = cover.getIntValue(0);
+                currentElement = cover.getIntValue(0);
             }
             fTemp++;
+
+            if (randomized) {
+                currentSet = cover.getIntValue(1);
+
+                if (!coveredBy.containsKey(currentSet)) {
+                    coveredBy.put(currentSet, new HashSet<Integer>());
+                }
+                coveredBy.get(currentSet).add(currentElement);
+            }
         }
         if (f < fTemp) f = fTemp;
 
@@ -52,19 +69,32 @@ public class Main {
 
         int[] rounded_x = new int[n];
 
-        if (!randomized) {      
+        if (!randomized) {
             for (int i = 0; i < n; i++) {
                 if (x.get(i + 1) > limit) rounded_x[i] = 1;
                 else rounded_x[i] = 0;
             }
-            
+
         } else {
             Random rand = new Random();
-            for (int i = 0; i < n; i++) {
-                if (rand.nextDouble() < x.get(i + 1)) rounded_x[i] = 1;
-                else rounded_x[i] = 0;
+            HashSet covered = new HashSet<Integer>(m);
+            int j, start;
+            while (covered.size() < m) {
+                for (int i = 0; i < n; i++) {
+                    // If we have already picked x_i continue
+                    if (rounded_x[i] == 1) continue;
+
+
+                    if (rand.nextDouble() < x.get(i + 1)) {
+                        // select x and mark more of the universe as covered
+                        rounded_x[i] = 1;
+
+                        covered.addAll(coveredBy.get(i+1));
+                    }
+
+                    else rounded_x[i] = 0;
+                }
             }
-            // TODO VERIFY AND REPEAT IF NECCESSARY
         }
 
         double totalCost = 0.0;
@@ -114,7 +144,6 @@ public class Main {
         System.out.printf("Took %.2fms\n",(end-start)/1000000.0);
 
 
-        
+
     }
 }
-
