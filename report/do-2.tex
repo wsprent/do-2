@@ -65,7 +65,7 @@ for some constant $c$.
 
 \section{Implementation part}
 
-We report the best Solutions in Table 1 and Computational Time in Table 2 against each of the instances for each of the methods. For the two tables, n represents number of times run. As well Simplified Rounding is represented by (SR), Randomized Rounding by (RR), Primal-Dual Method(PDM).
+We report the best Solutions in Table \ref{tab:res} and Computational Time in Table \ref{tab:time} against each of the instances for each of the methods. For the two tables, n represents number of times run. As well Simplified Rounding is represented by (SR), Randomized Rounding by (RR), Primal-Dual Method(PDM).
 
 \begin{table}[h!]
   \centering
@@ -99,9 +99,26 @@ Since all of the approximation methods are $f$-approximations \citep[pp. 118-131
   \label{tab:time}
 \end{table}
 
+ Unsurprisingly, the approximation methods run much faster than Cplex takes to find the exact solution. All three of our methods take pretty much the same amount of time.
 
- Unsurprisingly, the approximation methods run much faster than Cplex takes to find the exact solution. All three of our methods take pretty much the same amount of time,
-  which could indicate that the majority of the time is spent on solving the LP relaxation.
+ Note that the timing is taken from the moment we load the models and data in from the files to the completion of the algorithms. By only taking the time of the file loading and LP relaxation solving, we observed times similar to the approximation algorithm times. This would indicate that the majority of the time is spent on solving the LP relaxation, and the time spent on solving the approximations is trivial.\\
+
+Regarding the theoretical results, we tested them by running just the first iteration of the randomized rounding algorithm and counting the covered vertices. This was done 100 times and averaged for each data set. The results can be seen in Table \ref{tab:rand}.
+
+\begin{table}[h!]
+  \centering
+  \begin{tabular}{|c|c|c|c|c|}\hline
+    Instance& $n$ & Number of elements & Elements covered first iteration & Fraction covered\\\hline
+    scpa3.dat &$100$    & $300$ & $270.4$ & 0.90 \\
+    scpc3.dat &$100$    & $400$ & $358.21$ & 0.89\\
+    scpnrf1.dat	 &$100$ & $500$ & $395.65$ & 0.79 \\
+    scpnrg5.dat &$100$  & $1000$ & $856.96$ & 0.86 \\\hline
+  \end{tabular}
+  \caption{Average covered elements in first iteration, randomized rounding.}
+  \label{tab:rand}
+\end{table}
+
+As we can see from the table, the average fraction of vertices covered in the first iteration is well over one half, which is consistent with the expectation from the theoretical part.
 
 \clearpage
 \bibliographystyle{abbrvnat}
