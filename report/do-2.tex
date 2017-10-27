@@ -24,15 +24,57 @@ bla bla bla
 
 \section{Implementation part}
 
-\subsection{CPLEX}
-bla bla
+We report the best Solutions in Table 1 and Computational Time in Table 2 against each of the instances for each of the methods. For the two tables, n represents number of times run. As well Simplified Rounding is represented by (SR), Randomized Rounding by (RR), Primal-Dual Method(PDM), and Integer Linear Problem(ILP)
 
+\paragraph{Solutions}\mbox{}\\
+
+
+\begin{table}[h!]
+  \centering
+  \begin{tabular}{|c|c|c|c|c|c|c|}\hline
+    Instance& $n$& CPLEX&SR&RR&PDM&ILP  \\\hline
+    scpa3.dat &$0$&$0$ & $0$ & $0$& $0$ & $0$  \\
+    scpc3.dat &$0$&$0$ & $0$ & $0$& $0$ & $0$ \\
+    scpnrf1.dat &$0$&$0$ & $0$ & $0$& $0$ & $0$  \\
+    scpnrg5.dat &$0$&$0$ & $0$ & $0$& $0$ & $0$  \\\hline
+  \end{tabular}
+  \caption{Results of methods on their Solution Value}
+  \label{tab:res}
+\end{table}
+
+\paragraph{Computational Time}\mbox{}\\
+
+\begin{table}[h!]
+  \centering
+  \begin{tabular}{|c|c|c|c|c|c|c|}\hline
+    Instance& $n$& CPLEX&SR&RR&PDM&ILP \\\hline
+    scpa3.dat &$0$&$0$ & $0$ & $0$& $0$ & $0$  \\
+    scpc3.dat &$0$&$0$ & $0$ & $0$& $0$ & $0$ \\
+    scpnrf1.dat	 &$0$&$0$ & $0$ & $0$& $0$ & $0$  \\
+    scpnrg5.dat &$0$&$0$ & $0$ & $0$& $0$ & $0$  \\\hline
+  \end{tabular}
+  \caption{Results for Computational Time in ms}
+  \label{tab:res}
+\end{table}
+
+\paragraph{How each Method relates to the others}\mbox{}\\
+We note that with CPLEX ...
+
+
+
+\subsection{CPLEX specific Analysis}
+if necessary
 \subsection{Rounding}
-blabla
+bla bla and
+\paragraph{Relate the Randomized Rounding to the theoretical question addressed in 1.1.}
 
-\subsection{Third method}
-bla bla
-test: \cite{Wolsey}
+\subsection{Primal-Dual Method specific Analysis}
+if necessary
+
+
+
+cite wolsey here
+
 
 \clearpage
 \bibliographystyle{abbrvnat}
