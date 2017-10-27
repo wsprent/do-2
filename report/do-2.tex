@@ -50,7 +50,7 @@ Then we have that the expected number of uncovered elements is the following,
 $$\EE[|NC|] = \sum_a \PP[a \in NC] \leq \frac{n}{e}\mathnormal{.}$$
 Then we can derive a bound, by applying Markov's inequality again,
 \begin{align*}
-  \PP[|NC| \geq \frac{n}{2}] \leq \frac{\EE[|NC|]}{\frac{n}{2}} 
+  \PP\left[|NC| \geq \frac{n}{2}\right] \leq \frac{\EE[|NC|]}{\frac{n}{2}}
                              \leq \frac{\frac{n}{e}}{\frac{n}{2}} 
                              = \frac{2}{e}\mathnormal{.}
 \end{align*}
@@ -60,6 +60,8 @@ We then combine the bounds by union bound which gives us
 $$\PP\left[\mathrm{cost}(\mathcal{C}) \geq O(\mathrm{OPT}_f) \vee  |NC| \geq \frac{n}{2} \right]
 \leq \frac{1}{c} + \frac{2}{e}$$
 for some constant $c$.
+
+This is not a particularly strong bound as $\frac{2}{e} \approx 0.74$, i.e. the probability of the inverse ($\mathcal{C}$ covers at least half the vertices at a cost of at most $O(OPT)$) will be lower-bounded by some constant value approximately $0.26 - \frac{1}{c}$ for some constant $c$.
 
 \clearpage
 
