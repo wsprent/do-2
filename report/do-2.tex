@@ -11,6 +11,9 @@
 \usepackage{amsthm}
 \usepackage{bm}
 
+\newcommand{\PP}{\mathbb{P}}      % for Prob
+\newcommand{\EE}{\mathbb{E}}      % for Expectation
+
 \begin{document}
 \title{Discrete Optimization Assignment 2}
 \author{Quintin Hill, Chi Pham, William Sprent}
@@ -19,8 +22,46 @@
 \clearpage
 
 \section{Theoretical part}
-bla bla bla
+The Randomized Rounding algorithm picks a collection $\mathcal{C}$ of sets to include in
+the final solution. We wish to find the probability that at least $\frac{n}{2}$ sets and
+the total cost of the sets $c(\mathcal{C})$ is less than $O(OPT)$.
+
+We will equivalently bound the probability that the number of uncovered elements, $|NC|$,
+exceeds $\frac{n}{2}$, and that $c(\mathcal{C}) \geq O(OPT_f)$. We will bound these seperately
+and combine them by union bound.
+
+\paragraph{Case 1 ( $c(\mathcal{C}) \geq O(OPT_f)$):}
+We note that we have,
+$$\EE[\mathrm{cost}(\mathcal{C})] = \mathrm{OPT}_f\mathnormal{.}$$
+By applying Markov's inequality, we get
+\begin{align*}
+\PP[\mathrm{cost}(\mathcal{C}) \geq O(\mathrm{OPT}_f)]
+  \leq \frac{\mathrm{OPT}_f}{O(\mathrm{OPT}_f)}
+  = \frac{1}{c}
+\end{align*}
+for some constant, $c$.
+
+\paragraph{Case 2 ($|NC| \geq \frac{n}{2}$):}
+We have that the probability that an element, $a$, is uncovered, $a \in NC$, is the following
+$$\PP[a \in NC] \leq \frac{1}{e}$$
+\citep[p. 121]{Vaz}.
+Then we have that the expected number of uncovered elements is the following,
+$$\EE[|NC|] = \sum_a \PP[a \in NC] \leq \frac{n}{e}\mathnormal{.}$$
+Then we can derive a bound, by applying Markov's inequality again,
+\begin{align*}
+  \PP[|NC| \geq \frac{n}{2}] \leq \frac{\EE[|NC|]}{\frac{n}{2}} 
+                             \leq \frac{\frac{n}{e}}{\frac{n}{2}} 
+                             = \frac{2}{e}\mathnormal{.}
+\end{align*}
+
+\paragraph{Combined Bound}
+We then combine the bounds by union bound which gives us
+$$\PP\left[\mathrm{cost}(\mathcal{C}) \geq O(\mathrm{OPT}_f) \vee  |NC| \geq \frac{n}{2} \right]
+\leq \frac{1}{c} + \frac{2}{e}$$
+for some constant $c$.
+
 \clearpage
+
 
 \section{Implementation part}
 
