@@ -129,10 +129,10 @@ public class Main {
         for (Integer setIndex : x.keySet()) {
             totalCost += setCosts.get(setIndex);
         }
-        System.out.printf("LP Relaxation Cost: %.2f\n", objValue);
-        System.out.printf("Primal-Dual Schema Cost: %.2f\n", totalCost);
         System.out.println("Approximation Factor: " + totalCost/objValue);
         System.out.println("Approximation Factor Bound (f): " + f);
+        System.out.printf("LP Relaxation Cost: %.2f\n", objValue);
+        System.out.printf("Primal-Dual Schema Cost: %.2f\n", totalCost);
     }
 
     public static void main(String[] args){
@@ -150,6 +150,7 @@ public class Main {
         long start = System.nanoTime();
         try {
             IloCplex cplex = new IloCplex();
+            cplex.setOut(null);
             IloOplModel mod = oplF.createOplModel(def, cplex);
             mod.addDataSource(dataSource);
             mod.generate();
@@ -162,7 +163,7 @@ public class Main {
             } else if (args[2].contains("-rand")) {
                 randomRounding(setCover);
             } else if (args[2].contains("-cplex")) {
-                System.out.println("Solved ILP by CPLEX");
+                System.out.println("S0lved ILP by CPLEX");
                 System.out.printf("Cost Is: %.2f\n", setCover.getObjValue());
             } else if (args[2].contains("-dual")) {
                 primalDual(setCover);
