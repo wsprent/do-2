@@ -12,7 +12,7 @@ default: compile
 
 compile:
 	mkdir -p $(TARGET)
-	javac -cp $(SRC):$(LIB)* $(SRC)do2/Main.java -d $(TARGET)
+	javac -cp $(SRC):$(LIB)* $(SRC)do2/Main.java -d $(TARGET) -Xlint:unchecked
 
 run-rounding:
 	LD_LIBRARY_PATH=$(OPL) java -cp $(TARGET):$(LIB)* -Djava.library.path=$(CPLEX):$(OPL)	do2.Main $(LPMODEL) $(ILPDATA) -round

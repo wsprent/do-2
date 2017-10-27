@@ -10,14 +10,14 @@ import java.util.Iterator;
 
 public class SetCoverLinearProgram {
 
-	private IloOplModel model;
+    private IloOplModel model;
     private int numberOfSets;
     private int numberOfElements;
     private int highestFrequency;
     private HashMap<Integer, Integer> setCosts;
     private HashMap<Integer, Double> setVariables;
-    private HashMap<Integer, HashSet> setElements;
-    private HashMap<Integer, HashSet> elementSets;
+    private HashMap<Integer, HashSet<Integer>> setElements;
+    private HashMap<Integer, HashSet<Integer>> elementSets;
     private double objValue;
 
     /** Constructs a SetCoverLinearProgram.
@@ -28,8 +28,8 @@ public class SetCoverLinearProgram {
         this.numberOfElements = model.getElement("m").asInt();
         this.setCosts = new HashMap<Integer, Integer>(this.numberOfSets);
         this.setVariables = new HashMap<Integer, Double>(this.numberOfSets);
-        this.setElements = new HashMap<Integer, HashSet>(this.numberOfSets);
-        this.elementSets = new HashMap<Integer, HashSet>(this.numberOfElements);
+        this.setElements = new HashMap<Integer, HashSet<Integer>>(this.numberOfSets);
+        this.elementSets = new HashMap<Integer, HashSet<Integer>>(this.numberOfElements);
     }
 
     /** Sets up information, might throw. */
@@ -103,10 +103,10 @@ public class SetCoverLinearProgram {
     public HashMap<Integer, Double> getSetVariables() { return this.setVariables; }
 
     /** Gets map of set index to the indices of elements it covers */
-    public HashMap<Integer, HashSet> getSetElements() { return this.setElements; }
+    public HashMap<Integer, HashSet<Integer>> getSetElements() { return this.setElements; }
 
     /** Gets map of element index to the indices of sets that cover the element */
-	public HashMap<Integer, HashSet> getElementSets() { return this.elementSets; }
+    public HashMap<Integer, HashSet<Integer>> getElementSets() { return this.elementSets; }
 
     /** Gets the objective value solution to the relaxation of the linear program */
     public double getObjValue() { return this.objValue; }

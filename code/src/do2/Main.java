@@ -41,13 +41,13 @@ public class Main {
         int n = setCover.getNumberOfSets();
         int m = setCover.getNumberOfElements();
         HashMap<Integer, Double> x = setCover.getSetVariables();
-        HashMap<Integer, HashSet> setElements = setCover.getSetElements();
+        HashMap<Integer, HashSet<Integer>> setElements = setCover.getSetElements();
         HashMap<Integer, Integer> setCosts = setCover.getSetCosts();
 
         double limit = 1.0 / f;
         int[] rounded_x = new int[n];
         Random rand = new Random();
-        HashSet covered = new HashSet<Integer>(m);
+        HashSet<Integer> covered = new HashSet<Integer>(m);
         int j, start;
         while (covered.size() < m) {
             for (int i = 0; i < n; i++) {
@@ -75,8 +75,8 @@ public class Main {
 
         int f = setCover.getHighestFrequency();
         int n = setCover.getNumberOfSets();
-        HashMap<Integer, HashSet> elementSets = setCover.getElementSets();
-        HashMap<Integer, HashSet> setElements = setCover.getSetElements();
+        HashMap<Integer, HashSet<Integer>> elementSets = setCover.getElementSets();
+        HashMap<Integer, HashSet<Integer>> setElements = setCover.getSetElements();
         HashMap<Integer, Integer> setCosts = setCover.getSetCosts();
 
         // maps set index to the current maximum value y's can be raised;
@@ -96,9 +96,9 @@ public class Main {
             // find the max we can raise y_e before some set goes tight
             HashSet<Integer> sets = elementSets.get(e);
             List<Integer> tightSets = new ArrayList<Integer>();
-            double maxRaise = 0;
+            int maxRaise = 0;
             for (Integer setIndex : sets) {
-                double currentMaxRaise = setYBounds.get(setIndex);
+                int currentMaxRaise = setYBounds.get(setIndex);
 
                 // found a tighter set, reset the current progress
                 if (maxRaise < currentMaxRaise) {
@@ -106,7 +106,7 @@ public class Main {
                     tightSets = new ArrayList<Integer>();
                 }
 
-                // found another tight set (double equality?)
+                // found another tight set
                 if (maxRaise == currentMaxRaise) {
                     tightSets.add(setIndex);
                 }
