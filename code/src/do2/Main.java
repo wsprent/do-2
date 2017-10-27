@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.Random;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
 
@@ -111,6 +113,104 @@ public class Main {
     public static void rounding (IloOplFactory fac, IloOplModel mod) throws IloException {
         rounding(fac, mod, false);
     }
+
+    public static void primalDual(IloOplModel mod) throws IloException {
+
+        /* SETUP */
+
+        IloCplex cplex = mod.getCplex();
+        IloIntMap c = mod.getElement("c").asIntMap();               // costs
+        int n = mod.getElement("n").asInt();                        // number of sets
+        int m = mod.getElement("m").asInt();                        // number of elements
+        IloTupleSet covers = mod.getElement("covers").asTupleSet(); // covering tuples
+
+        // maps element index to all sets that cover the element
+        HashMap<Integer, HashSet> elementSets = new HashMap<Integer, HashSet>(m);
+
+        // maps set index to all elements that the set covers
+        HashMap<Integer, HashSet> setElements = new HashMap<Integer, HashSet>(n);
+
+        // maps set index to the current maximum value its y's can be raised
+        HashMap<Integer, Integer> setYBounds = new HashMap<Integer, Integer>(n);
+
+        // get the most frequent element and populate data sets
+        int f = 0, currentElement = 0, currentSet, fTemp = 0;
+        IloTuple cover;
+        for (int i = 0; i < covers.getSize(); i++) {
+            cover = covers.makeTuple(i);
+            currentSet = cover.getIntValue(1);
+
+            // update most frequent element
+            if (currentElement != cover.getIntValue(0)) {
+                f = f < fTemp ? fTemp : f;
+                fTemp = 0;
+                currentElement = cover.getIntValue(0);
+            }
+            fTemp++;
+
+            // update sets mapped to this element
+            if (!elementSets.containsKey(currentElement)) {
+                elementSets.put(currentElement, new HashSet<Integer>());
+            }
+            elementSets.get(currentElement).add(currentSet);
+
+            // update elements mapped to this set
+            if (!setElements.containsKey(currentSet)) {
+                setElements.put(currentSet, new HashSet<Integer>());
+
+                // initially, any y_e can be raised to at most the cost
+                setYBounds.put(currentSet, c.get(currentSet));
+            }
+            setElements.get(currentSet).add(currentElement);
+        }
+        f = f < fTemp ? fTemp : f;
+
+        /* ALGORITHM 15.2 */
+
+        // maps set index to decision variable, 0 or 1
+        HashMap<Integer, Integer> x = new HashMap<Integer, Integer>();
+
+        List<Integer> notCovered = new ArrayList<Integer>(elementSets.keySet());
+        while (notCovered.size() > 0) {
+            int e = notCovered.remove(0);
+
+            // find the max we can raise y_e before some set goes tight
+            HashSet<Integer> sets = elementSets.get(e);
+            List<Integer> tightSets = new ArrayList<Integer>();
+            double maxRaise = 0;
+            for (Integer setIndex : sets) {
+                double currentMaxRaise = setYBounds.get(setIndex);
+
+                // found a tighter set, reset the current progress
+                if (maxRaise < currentMaxRaise) {
+                    maxRaise = currentMaxRaise;
+                    tightSets = new ArrayList<Integer>();
+                }
+
+                // found another tight set (double equality?)
+                if (maxRaise == currentMaxRaise) {
+                    tightSets.add(setIndex);
+                }
+            }
+
+            // update x variables and covered elements
+            for (Integer tightSetIndex : tightSets) {
+                setYBounds.put(tightSetIndex, 0);
+                x.put(tightSetIndex, 1);
+                notCovered.removeAll(setElements.get(tightSetIndex));
+            }
+        }
+
+        /* OUTPUT THE APPROXIMATED COST */
+        double totalCost = 0.0;
+        for (Integer setIndex : x.keySet()) {
+            totalCost += c.get(setIndex);
+        }
+        System.out.printf("LP Relaxation Cost: %.2f\n", mod.getCplex().getObjValue());
+        System.out.printf("Primal-Dual Schema Cost: %.2f\n", totalCost);
+        System.out.println("Upper Approximation Bound: " + (f*cplex.getObjValue()));
+    }
+
     public static void main(String[] args){
 
         String modelPath = args[0];
@@ -138,6 +238,8 @@ public class Main {
             } else if (args[2].contains("-cplex")) {
                 System.out.println("Solved ILP by CPLEX");
                 System.out.printf("Cost Is: %.2f\n", cplex.getObjValue());
+            } else if (args[2].contains("-dual")) {
+                primalDual(mod);
             }
         } catch (IloException e) {
             System.out.println("Something bad happened when loading model.");
