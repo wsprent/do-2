@@ -66,8 +66,6 @@ for some constant $c$.
 \section{Implementation part}
 
 We report the best Solutions in Table 1 and Computational Time in Table 2 against each of the instances for each of the methods. For the two tables, n represents number of times run. As well Simplified Rounding is represented by (SR), Randomized Rounding by (RR), Primal-Dual Method(PDM).
-\paragraph{Solutions}\mbox{}\\
-
 
 \begin{table}[h!]
   \centering
@@ -82,7 +80,11 @@ We report the best Solutions in Table 1 and Computational Time in Table 2 agains
   \label{tab:res}
 \end{table}
 
-\paragraph{Computational Time}\mbox{}\\
+We note that the approximated solutions given by our three methods generally have about double the cost of the optimal solution to the ILP.
+Moreover, the RR and PDM methods seem to give tighter approximations than the SR method. RR and PDM are comparatively close, but RR outperforms PDM
+on two of the datasets.
+
+Since all of the approximation methods are $f$-approximations \citep[pp. 118-131]{Vaz} they all stay well within their ``guarantees''.
 
 \begin{table}[h!]
   \centering
@@ -90,31 +92,16 @@ We report the best Solutions in Table 1 and Computational Time in Table 2 agains
     Instance& $n$& CPLEX(ILP)&SR&RR&PDM \\\hline
     scpa3.dat &$10$&$724.0$ & $238.4$& $239.5$ & $238.5$  \\
     scpc3.dat &$10$ & $3400.3$ & $359.4$& $363.8$ & $368.0$ \\
-    scpnrf1.dat	 &$10$ & $2838.5$ & $5506.4$& $5552.0$ & $5629.8$  \\
+    scpnrf1.dat	 &$10$ & $28383.5$ & $5506.4$& $5552.0$ & $5629.8$  \\
     scpnrg5.dat &$10$ & -- & $1931.3$& $1926.0$ & $1925.8$  \\\hline
   \end{tabular}
   \caption{Results for Computational Time in ms}
-  \label{tab:res}
+  \label{tab:time}
 \end{table}
 
-\paragraph{How each Method relates to the others}\mbox{}\\
-We note that with CPLEX ...
 
-
-
-\subsection{CPLEX specific Analysis}
-if necessary
-\subsection{Rounding}
-bla bla and
-\paragraph{Relate the Randomized Rounding to the theoretical question addressed in 1.1.}
-
-\subsection{Primal-Dual Method specific Analysis}
-if necessary
-
-
-
-cite wolsey here
-
+ Unsurprisingly, the approximation methods run much faster than Cplex takes to find the exact solution. All three of our methods take pretty much the same amount of time,
+  which could indicate that the majority of the time is spent on solving the LP relaxation.
 
 \clearpage
 \bibliographystyle{abbrvnat}
