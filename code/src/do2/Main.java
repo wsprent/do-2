@@ -96,25 +96,29 @@ public class Main {
             // find the max we can raise y_e before some set goes tight
             HashSet<Integer> sets = elementSets.get(e);
             List<Integer> tightSets = new ArrayList<Integer>();
-            int maxRaise = 0;
+            int tightestBound = Integer.MAX_VALUE;
             for (Integer setIndex : sets) {
-                int currentMaxRaise = setYBounds.get(setIndex);
+                int currentBound = setYBounds.get(setIndex);
 
                 // found a tighter set, reset the current progress
-                if (maxRaise < currentMaxRaise) {
-                    maxRaise = currentMaxRaise;
+                if (currentBound < tightestBound) {
+                    tightestBound = currentBound;
                     tightSets = new ArrayList<Integer>();
                 }
 
                 // found another tight set
-                if (maxRaise == currentMaxRaise) {
+                if (tightestBound == currentBound) {
                     tightSets.add(setIndex);
                 }
             }
 
+            // update y bounds for all sets that cover this edge
+            for (Integer setIndex : sets) {
+                setYBounds.put(setIndex, setYBounds.get(setIndex) - tightestBound);
+            }
+
             // update x variables and covered elements
             for (Integer tightSetIndex : tightSets) {
-                setYBounds.put(tightSetIndex, 0);
                 x.put(tightSetIndex, 1);
                 notCovered.removeAll(setElements.get(tightSetIndex));
             }
@@ -127,7 +131,8 @@ public class Main {
         }
         System.out.printf("LP Relaxation Cost: %.2f\n", objValue);
         System.out.printf("Primal-Dual Schema Cost: %.2f\n", totalCost);
-        System.out.println("Upper Approximation Bound: " + Math.floor(f*objValue));
+        System.out.println("Approximation Factor: " + totalCost/objValue);
+        System.out.println("Approximation Factor Bound (f): " + f);
     }
 
     public static void main(String[] args){
