@@ -13,108 +13,66 @@ import java.util.List;
 
 public class Main {
 
-    public static void rounding(IloOplFactory fac, IloOplModel mod, Boolean randomized) throws IloException {
-        IloCplex cplex = mod.getCplex();
+    public static void lpRounding(SetCoverLinearProgram setCover) throws IloException {
 
-        // Constraints
-        IloIntMap c = mod.getElement("c").asIntMap();
-
-        // Number of Sets
-        int n = mod.getElement("n").asInt();
-        // Size of the Universe
-        int m = mod.getElement("m").asInt();
-
-
-        // Objective Values
-        IloNumMap x = mod.getElement("x").asNumMap();
-
-        IloTupleSet covers = mod.getElement("covers").asTupleSet();
-        Iterator it = covers.iterator();
-        int f = 0;
-        int currentElement = 0;
-        int currentSet;
-        int fTemp = 0;
-        IloTuple cover;
-        HashMap<Integer, HashSet> coveredBy = new HashMap<Integer, HashSet>(m);
-
-        // find frequency of most frequent element;
-        // and set indices for when covers start in the list
-        // we assume the cover tuples are sorted by set
-        for (int i = 0; i < covers.getSize(); i++) {
-            // (elem, set)
-            cover = covers.makeTuple(i);
-
-            if (currentElement != cover.getIntValue(0)) {
-                if (f < fTemp) {
-                    f = fTemp;
-                }
-
-                fTemp = 0;
-                currentElement = cover.getIntValue(0);
-            }
-            fTemp++;
-
-            if (randomized) {
-                currentSet = cover.getIntValue(1);
-
-                if (!coveredBy.containsKey(currentSet)) {
-                    coveredBy.put(currentSet, new HashSet<Integer>());
-                }
-                coveredBy.get(currentSet).add(currentElement);
-            }
-        }
-        if (f < fTemp) f = fTemp;
+        int f = setCover.getHighestFrequency();
+        int n = setCover.getNumberOfSets();
+        HashMap<Integer, Double> x = setCover.getSetVariables();
+        HashMap<Integer, Integer> setCosts = setCover.getSetCosts();
 
         double limit = 1.0 / f;
-
-        // Do Rounding
-
         int[] rounded_x = new int[n];
+        for (int i = 0; i < n; i++) {
+            if (x.get(i + 1) >= limit) rounded_x[i] = 1;
+            else rounded_x[i] = 0;
+        }
 
-        if (!randomized) {
+        double totalCost = 0.0;
+        for (int i = 0; i < n; i++) {
+            totalCost += rounded_x[i] * setCosts.get(i+1);
+        }
+        System.out.printf("LP Relaxation Cost is: %.2f\n", setCover.getObjValue());
+        System.out.printf("Rounded Cost Is: %.2f\n", totalCost);
+    }
+
+    public static void randomRounding(SetCoverLinearProgram setCover) throws IloException {
+
+        int f = setCover.getHighestFrequency();
+        int n = setCover.getNumberOfSets();
+        int m = setCover.getNumberOfElements();
+        HashMap<Integer, Double> x = setCover.getSetVariables();
+        HashMap<Integer, HashSet> setElements = setCover.getSetElements();
+        HashMap<Integer, Integer> setCosts = setCover.getSetCosts();
+
+        double limit = 1.0 / f;
+        int[] rounded_x = new int[n];
+        Random rand = new Random();
+        HashSet covered = new HashSet<Integer>(m);
+        int j, start;
+        while (covered.size() < m) {
             for (int i = 0; i < n; i++) {
-                if (x.get(i + 1) > limit) rounded_x[i] = 1;
-                else rounded_x[i] = 0;
-            }
+                // If we have already picked x_i continue
+                if (rounded_x[i] == 1) continue;
 
-        } else {
-            Random rand = new Random();
-            HashSet covered = new HashSet<Integer>(m);
-            int j, start;
-            while (covered.size() < m) {
-                for (int i = 0; i < n; i++) {
-                    // If we have already picked x_i continue
-                    if (rounded_x[i] == 1) continue;
-
-
-                    if (rand.nextDouble() < x.get(i + 1)) {
-                        // select x and mark more of the universe as covered
-                        rounded_x[i] = 1;
-
-                        covered.addAll(coveredBy.get(i+1));
-
-                    }
-                    else rounded_x[i] = 0;
-
+                if (rand.nextDouble() < x.get(i + 1)) {
+                    // select x and mark more of the universe as covered
+                    rounded_x[i] = 1;
+                    covered.addAll(setElements.get(i+1));
                 }
-
+                else rounded_x[i] = 0;
             }
         }
 
         double totalCost = 0.0;
-
         for (int i = 0; i < n; i++) {
-            totalCost += rounded_x[i] * c.get(i+1);
+            totalCost += rounded_x[i] * setCosts.get(i+1);
         }
-        System.out.printf("LP Relaxation Cost is: %.2f\n", mod.getCplex().getObjValue());
+        System.out.printf("LP Relaxation Cost is: %.2f\n", setCover.getObjValue());
         System.out.printf("Rounded Cost Is: %.2f\n", totalCost);
     }
 
-    public static void rounding (IloOplFactory fac, IloOplModel mod) throws IloException {
-        rounding(fac, mod, false);
-    }
-
     public static void primalDual(SetCoverLinearProgram setCover) throws IloException {
+
         int f = setCover.getHighestFrequency();
         int n = setCover.getNumberOfSets();
         HashMap<Integer, HashSet> elementSets = setCover.getElementSets();
@@ -190,18 +148,17 @@ public class Main {
             IloOplModel mod = oplF.createOplModel(def, cplex);
             mod.addDataSource(dataSource);
             mod.generate();
-            cplex.solve();
 
             SetCoverLinearProgram setCover = new SetCoverLinearProgram(mod);
             setCover.setup();
 
             if (args[2].contains("-round")) {
-                rounding(oplF, mod);
+                lpRounding(setCover);
             } else if (args[2].contains("-rand")) {
-                rounding(oplF, mod, true);
+                randomRounding(setCover);
             } else if (args[2].contains("-cplex")) {
                 System.out.println("Solved ILP by CPLEX");
-                System.out.printf("Cost Is: %.2f\n", cplex.getObjValue());
+                System.out.printf("Cost Is: %.2f\n", setCover.getObjValue());
             } else if (args[2].contains("-dual")) {
                 primalDual(setCover);
             }

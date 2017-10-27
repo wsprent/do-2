@@ -15,6 +15,7 @@ public class SetCoverLinearProgram {
     private int numberOfElements;
     private int highestFrequency;
     private HashMap<Integer, Integer> setCosts;
+    private HashMap<Integer, Double> setVariables;
     private HashMap<Integer, HashSet> setElements;
     private HashMap<Integer, HashSet> elementSets;
     private double objValue;
@@ -26,14 +27,31 @@ public class SetCoverLinearProgram {
         this.numberOfSets = model.getElement("n").asInt();
         this.numberOfElements = model.getElement("m").asInt();
         this.setCosts = new HashMap<Integer, Integer>(this.numberOfSets);
+        this.setVariables = new HashMap<Integer, Double>(this.numberOfSets);
         this.setElements = new HashMap<Integer, HashSet>(this.numberOfSets);
         this.elementSets = new HashMap<Integer, HashSet>(this.numberOfElements);
     }
 
     /** Sets up information, might throw. */
     public void setup() throws IloException {
+
+        // get the obj value of the cplex lp relaxation
+        IloCplex cplex = this.model.getCplex();
+        if (cplex.getCplexStatus() == IloCplex.CplexStatus.Unknown) {
+            cplex.solve();
+        }
+        this.objValue = cplex.getObjValue();
+
         IloIntMap costs = this.model.getElement("c").asIntMap();
         IloTupleSet covers = this.model.getElement("covers").asTupleSet();
+        IloOplElement xvar = this.model.getElement("x");
+
+        // hack: we don't care about x variables if we are solving by ilp
+        // will throw exception if we call asNumMap() on an int map
+        IloNumMap xvariables = null;
+        if (xvar.getElementType() == IloOplElementType.Type.MAP_NUM) {
+            xvariables = xvar.asNumMap();
+        }
 
         // get the highest frequency and fill set-element mappings
         Iterator it = covers.iterator();
@@ -56,21 +74,17 @@ public class SetCoverLinearProgram {
             }
             this.elementSets.get(currentElement).add(currentSet);
 
-            // update elements mapped to this set + set cost
+            // update elements mapped to this set + set cost + set variables
             if (!this.setElements.containsKey(currentSet)) {
                 this.setElements.put(currentSet, new HashSet<Integer>());
                 this.setCosts.put(currentSet, costs.get(currentSet));
+                if (xvariables != null) {
+                    this.setVariables.put(currentSet, xvariables.get(currentSet));
+                }
             }
             this.setElements.get(currentSet).add(currentElement);
         }
         this.highestFrequency = Math.max(this.highestFrequency, fTemp);
-
-        // get the obj value of the cplex lp relaxation
-        IloCplex cplex = this.model.getCplex();
-        if (cplex.getCplexStatus() == IloCplex.CplexStatus.Unknown) {
-            cplex.solve();
-        }
-        this.objValue = cplex.getObjValue();
     }
 
     /** Gets number of sets (n). */
@@ -84,6 +98,9 @@ public class SetCoverLinearProgram {
 
     /** Gets map of set index to the cost of the set */
     public HashMap<Integer, Integer> getSetCosts() { return this.setCosts; }
+
+    /** Gets map of set index to the decision variable corresponding to the set */
+    public HashMap<Integer, Double> getSetVariables() { return this.setVariables; }
 
     /** Gets map of set index to the indices of elements it covers */
     public HashMap<Integer, HashSet> getSetElements() { return this.setElements; }
