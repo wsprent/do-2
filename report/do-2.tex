@@ -39,7 +39,8 @@ By applying Markov's inequality, we get
   \leq \frac{\mathrm{OPT}_f}{O(\mathrm{OPT}_f)}
   = \frac{1}{c}
 \end{align*}
-for some constant, $c$.
+for some constant, $c$. Where denominator in $\frac{\mathrm{OPT}_f}{O(\mathrm{OPT}_f)}$ should be interpreted as
+ \textit{any function in $O(\mathrm{OPT}_f)$}, all of which are seperated by $OPT_f$ by a constant factor.
 
 \paragraph{Case 2 ($|NC| \geq \frac{n}{2}$):}
 We have that the probability that an element, $a$, is uncovered, $a \in NC$, is the following
