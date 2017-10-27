@@ -24,19 +24,18 @@ bla bla bla
 
 \section{Implementation part}
 
-We report the best Solutions in Table 1 and Computational Time in Table 2 against each of the instances for each of the methods. For the two tables, n represents number of times run. As well Simplified Rounding is represented by (SR), Randomized Rounding by (RR), Primal-Dual Method(PDM), and Integer Linear Problem(ILP)
-
+We report the best Solutions in Table 1 and Computational Time in Table 2 against each of the instances for each of the methods. For the two tables, n represents number of times run. As well Simplified Rounding is represented by (SR), Randomized Rounding by (RR), Primal-Dual Method(PDM).
 \paragraph{Solutions}\mbox{}\\
 
 
 \begin{table}[h!]
   \centering
   \begin{tabular}{|c|c|c|c|c|c|c|}\hline
-    Instance& $n$& CPLEX&SR&RR&PDM&ILP  \\\hline
-    scpa3.dat &$0$&$0$ & $0$ & $0$& $0$ & $0$  \\
-    scpc3.dat &$0$&$0$ & $0$ & $0$& $0$ & $0$ \\
-    scpnrf1.dat &$0$&$0$ & $0$ & $0$& $0$ & $0$  \\
-    scpnrg5.dat &$0$&$0$ & $0$ & $0$& $0$ & $0$  \\\hline
+    Instance& $n$& CPLEX(ILP)&CPLEX(LP)&SR&RR&PDM  \\\hline
+    scpa3.dat &$10$&$232$ & $228$ & $490$& $369$ & $448$  \\
+    scpc3.dat &$10$&$243$ & $234.58$ & $587$& $442.7$ & $463$ \\
+    scpnrf1.dat &$10$&$14$ & $8.8$ & $78$& $29.7$ & $43.0$  \\
+    scpnrg5.dat &$10$&-- & $148.23$ & $621$& $382.1$ & $412$  \\\hline
   \end{tabular}
   \caption{Results of methods on their Solution Value}
   \label{tab:res}
@@ -46,12 +45,12 @@ We report the best Solutions in Table 1 and Computational Time in Table 2 agains
 
 \begin{table}[h!]
   \centering
-  \begin{tabular}{|c|c|c|c|c|c|c|}\hline
-    Instance& $n$& CPLEX&SR&RR&PDM&ILP \\\hline
-    scpa3.dat &$0$&$0$ & $0$ & $0$& $0$ & $0$  \\
-    scpc3.dat &$0$&$0$ & $0$ & $0$& $0$ & $0$ \\
-    scpnrf1.dat	 &$0$&$0$ & $0$ & $0$& $0$ & $0$  \\
-    scpnrg5.dat &$0$&$0$ & $0$ & $0$& $0$ & $0$  \\\hline
+  \begin{tabular}{|c|c|c|c|c|c|}\hline
+    Instance& $n$& CPLEX(ILP)&SR&RR&PDM \\\hline
+    scpa3.dat &$10$&$724.0$ & $238.4$& $239.5$ & $238.5$  \\
+    scpc3.dat &$10$ & $3400.3$ & $359.4$& $363.8$ & $368.0$ \\
+    scpnrf1.dat	 &$10$ & $2838.5$ & $5506.4$& $5552.0$ & $5629.8$  \\
+    scpnrg5.dat &$10$ & -- & $1931.3$& $1926.0$ & $1925.8$  \\\hline
   \end{tabular}
   \caption{Results for Computational Time in ms}
   \label{tab:res}
