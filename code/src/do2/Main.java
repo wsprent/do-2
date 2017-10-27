@@ -114,58 +114,19 @@ public class Main {
         rounding(fac, mod, false);
     }
 
-    public static void primalDual(IloOplModel mod) throws IloException {
+    public static void primalDual(SetCoverLinearProgram setCover) throws IloException {
+        int f = setCover.getHighestFrequency();
+        int n = setCover.getNumberOfSets();
+        HashMap<Integer, HashSet> elementSets = setCover.getElementSets();
+        HashMap<Integer, HashSet> setElements = setCover.getSetElements();
+        HashMap<Integer, Integer> setCosts = setCover.getSetCosts();
 
-        /* SETUP */
-
-        IloCplex cplex = mod.getCplex();
-        IloIntMap c = mod.getElement("c").asIntMap();               // costs
-        int n = mod.getElement("n").asInt();                        // number of sets
-        int m = mod.getElement("m").asInt();                        // number of elements
-        IloTupleSet covers = mod.getElement("covers").asTupleSet(); // covering tuples
-
-        // maps element index to all sets that cover the element
-        HashMap<Integer, HashSet> elementSets = new HashMap<Integer, HashSet>(m);
-
-        // maps set index to all elements that the set covers
-        HashMap<Integer, HashSet> setElements = new HashMap<Integer, HashSet>(n);
-
-        // maps set index to the current maximum value its y's can be raised
+        // maps set index to the current maximum value y's can be raised;
+        // initially it is the cost of the set
         HashMap<Integer, Integer> setYBounds = new HashMap<Integer, Integer>(n);
-
-        // get the most frequent element and populate data sets
-        int f = 0, currentElement = 0, currentSet, fTemp = 0;
-        IloTuple cover;
-        for (int i = 0; i < covers.getSize(); i++) {
-            cover = covers.makeTuple(i);
-            currentSet = cover.getIntValue(1);
-
-            // update most frequent element
-            if (currentElement != cover.getIntValue(0)) {
-                f = f < fTemp ? fTemp : f;
-                fTemp = 0;
-                currentElement = cover.getIntValue(0);
-            }
-            fTemp++;
-
-            // update sets mapped to this element
-            if (!elementSets.containsKey(currentElement)) {
-                elementSets.put(currentElement, new HashSet<Integer>());
-            }
-            elementSets.get(currentElement).add(currentSet);
-
-            // update elements mapped to this set
-            if (!setElements.containsKey(currentSet)) {
-                setElements.put(currentSet, new HashSet<Integer>());
-
-                // initially, any y_e can be raised to at most the cost
-                setYBounds.put(currentSet, c.get(currentSet));
-            }
-            setElements.get(currentSet).add(currentElement);
+        for (int setIndex : setElements.keySet()) {
+            setYBounds.put(setIndex, setCosts.get(setIndex));
         }
-        f = f < fTemp ? fTemp : f;
-
-        /* ALGORITHM 15.2 */
 
         // maps set index to decision variable, 0 or 1
         HashMap<Integer, Integer> x = new HashMap<Integer, Integer>();
@@ -201,14 +162,14 @@ public class Main {
             }
         }
 
-        /* OUTPUT THE APPROXIMATED COST */
+        double objValue = setCover.getObjValue();
         double totalCost = 0.0;
         for (Integer setIndex : x.keySet()) {
-            totalCost += c.get(setIndex);
+            totalCost += setCosts.get(setIndex);
         }
-        System.out.printf("LP Relaxation Cost: %.2f\n", mod.getCplex().getObjValue());
+        System.out.printf("LP Relaxation Cost: %.2f\n", objValue);
         System.out.printf("Primal-Dual Schema Cost: %.2f\n", totalCost);
-        System.out.println("Upper Approximation Bound: " + (f*cplex.getObjValue()));
+        System.out.println("Upper Approximation Bound: " + Math.floor(f*objValue));
     }
 
     public static void main(String[] args){
@@ -231,6 +192,9 @@ public class Main {
             mod.generate();
             cplex.solve();
 
+            SetCoverLinearProgram setCover = new SetCoverLinearProgram(mod);
+            setCover.setup();
+
             if (args[2].contains("-round")) {
                 rounding(oplF, mod);
             } else if (args[2].contains("-rand")) {
@@ -239,7 +203,7 @@ public class Main {
                 System.out.println("Solved ILP by CPLEX");
                 System.out.printf("Cost Is: %.2f\n", cplex.getObjValue());
             } else if (args[2].contains("-dual")) {
-                primalDual(mod);
+                primalDual(setCover);
             }
         } catch (IloException e) {
             System.out.println("Something bad happened when loading model.");

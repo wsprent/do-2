@@ -24,7 +24,7 @@ run-cplex:
 	LD_LIBRARY_PATH=$(OPL) java -cp $(TARGET):$(LIB)* -Djava.library.path=$(CPLEX):$(OPL)	do2.Main $(ILPMODEL) $(ILPDATA) -cplex
 
 run-primal-dual:
-	LD_LIBRARY_PATH=$(OPL) java -cp $(TARGET):$(LIB)* -Djava.library.path=$(CPLEX):$(OPL)	do2.Main $(ILPMODEL) $(ILPDATA) -primal-dual-schema
+	LD_LIBRARY_PATH=$(OPL) java -cp $(TARGET):$(LIB)* -Djava.library.path=$(CPLEX):$(OPL)	do2.Main $(LPMODEL) $(ILPDATA) -primal-dual-schema
 
 clean:
 	rm -rf $(TARGET)
